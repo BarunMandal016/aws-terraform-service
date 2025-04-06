@@ -5,3 +5,5 @@
 lambda_function_payload.zip
 .env
 node_modules
+lambda_layer_payload.zip
+axioslayer
