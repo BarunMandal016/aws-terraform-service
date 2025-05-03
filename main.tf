@@ -53,4 +53,40 @@ resource "aws_lambda_function" "test_lambda" {
       slack = "bot-token-has-changed"
     }
   }
+
+
+  layers = [aws_lambda_layer_version.lambda_layer.arn]
+}
+
+# Create a zip file for the axios layer
+data "archive_file" "axios_layer" {
+  type        = "zip"
+  source_dir = "./axioslayer"
+  output_path = "lambda_layer_payload.zip"
+}
+
+resource "aws_lambda_layer_version" "lambda_layer" {
+  filename            = data.archive_file.axios_layer.output_path
+  layer_name          = "lambda_layer_axios"
+  compatible_runtimes = ["nodejs22.x"]
+}
+
+data "aws_iam_policy_document" "s3_policy" {
+  statement {
+    actions = [
+      "s3:GetObject",
+      "s3:ListBucket",
+    ]
+
+    resources = [
+      "arn:aws:s3:::dummy-021/*",
+    ]
+  }
+  
+}
+
+resource "aws_iam_policy" "policy" {
+  name        = "s3_read_policy"
+  description = "This policy allows read access to S3 buckets"
+  policy = data.aws_iam_policy_document.s3_policy.json
 }
