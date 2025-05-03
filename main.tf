@@ -70,3 +70,23 @@ resource "aws_lambda_layer_version" "lambda_layer" {
   layer_name          = "lambda_layer_axios"
   compatible_runtimes = ["nodejs22.x"]
 }
+
+data "aws_iam_policy_document" "s3_policy" {
+  statement {
+    actions = [
+      "s3:GetObject",
+      "s3:ListBucket",
+    ]
+
+    resources = [
+      "arn:aws:s3:::dummy-021/*",
+    ]
+  }
+  
+}
+
+resource "aws_iam_policy" "policy" {
+  name        = "s3_read_policy"
+  description = "This policy allows read access to S3 buckets"
+  policy = data.aws_iam_policy_document.s3_policy.json
+}
